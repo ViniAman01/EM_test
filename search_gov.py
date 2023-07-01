@@ -12,8 +12,9 @@ driver.get("https://nces.ed.gov/globallocator/")
 def return_options(tag_name: str):
     select = Select(driver.find_element(By.TAG_NAME,tag_name))
     all_options = select.options
-    for option in all_options:
-        if option and option.get_attribute('value') != 'OTHER':
+    for option in select.options:
+        value_len = len(option.get_attribute('value'))
+        if value_len != 2:
             all_options.remove(option)
     return all_options
 
@@ -30,7 +31,6 @@ def get_city_names():
     lists = driver.find_elements(By.TAG_NAME,'li')
     city_names = []
     for li in lists:
-        print(li.text)
         city_names.append(li.text)
     return city_names
 
@@ -38,6 +38,24 @@ def set_city_name(city_name: str):
     input_city = driver.find_element(By.ID,'city') 
     input_city.clear()
     input_city.send_keys(city_name)
+    input_city.send_keys(Keys.ENTER)
+
+def click_search():
+    buttons = driver.find_elements(By.TAG_NAME,'input')
+    for button in buttons:
+        value = button.get_attribute('type')
+        if 'submit' in value:
+            button.click()
+            break
+
+def set_type_of_school(type: str):
+    if(type.lower() == 'public'):
+        checkbox = driver.find_element(By.XPATH,'//*[@id="institutions"]/table/tbody/tr/td/table/tbody/tr[4]/td[3]/font/input')
+        checkbox.click()
+    if(type.lower() == 'private'):
+        checkbox = driver.find_element(By.XPATH,'//*[@id="institutions"]/table/tbody/tr/td/table/tbody/tr[5]/td[3]/font/input')
+        checkbox.click()
+
 
 i = 0
 options = return_options('select')
@@ -48,12 +66,8 @@ for option in options:
     citys = get_city_names()
     driver.close()
     switch_window(0)
+    i += len(citys)
+    print(f'Num of citys: {i}')
+    set_type_of_school('public')
     for city in citys:
-        i += 1
         set_city_name(city)
-print(i)
-# table = driver.find_element(By.TAG_NAME,'ul')
-# li = table.find_elements(By.TAG_NAME,'li')
-# for item in li:
-#     print(f"Value: {item.get_attribute('xpath')}")
-# time.sleep(1000)
