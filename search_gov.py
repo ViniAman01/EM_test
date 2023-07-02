@@ -3,7 +3,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 import selenium.common.exceptions as ex
-import time
+import time,csv
 
 driver = webdriver.Chrome()
 driver.implicitly_wait(0.5)
@@ -56,6 +56,17 @@ def set_type_of_school(type: str):
         checkbox = driver.find_element(By.XPATH,'//*[@id="institutions"]/table/tbody/tr/td/table/tbody/tr[5]/td[3]/font/input')
         checkbox.click()
 
+def get_description():
+    descs = driver.find_elements(By.CLASS_NAME,'InstDesc')
+    for desc in descs:
+        if desc.get_attribute('align') != 'center':
+            desc_line = desc.text.splitlines()
+            del desc_line[2:]
+            print(desc_line)
+            with open('US_schools.csv', 'w', newline='') as csv_file:
+                spam_writer = csv.writer(csv_file, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+                spam_writer.writerow(desc_line)
+
 
 i = 0
 options = return_options('select')
@@ -71,3 +82,4 @@ for option in options:
     set_type_of_school('public')
     for city in citys:
         set_city_name(city)
+        get_description()
