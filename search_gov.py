@@ -20,7 +20,6 @@ def return_options(tag_name: str):
 
 def open_window_city():
     browse_for_city = driver.find_element(By.PARTIAL_LINK_TEXT,'Browse')
-    time.sleep(0.5)
     browse_for_city.click()
 
 def switch_window(num_window):
@@ -49,37 +48,61 @@ def click_search():
             break
 
 def set_type_of_school(type: str):
-    if(type.lower() == 'public'):
-        checkbox = driver.find_element(By.XPATH,'//*[@id="institutions"]/table/tbody/tr/td/table/tbody/tr[4]/td[3]/font/input')
-        checkbox.click()
-    if(type.lower() == 'private'):
-        checkbox = driver.find_element(By.XPATH,'//*[@id="institutions"]/table/tbody/tr/td/table/tbody/tr[5]/td[3]/font/input')
-        checkbox.click()
+    checkbox_public = driver.find_element(By.XPATH,'//*[@id="institutions"]/table/tbody/tr/td/table/tbody/tr[4]/td[3]/font/input')
+    is_checked_public = checkbox_public.get_attribute('checked')
+    print(f"public: {is_checked_public}")
+    checkbox_private = driver.find_element(By.XPATH,'//*[@id="institutions"]/table/tbody/tr/td/table/tbody/tr[5]/td[3]/font/input')
+    is_checked_private = checkbox_private.get_attribute('checked')
+    print(f"private: {is_checked_private}")
+    if 'public' in type.lower() and not 'private' in type.lower():
+        if is_checked_private:
+            checkbox_private.click()
+        if not is_checked_public:
+            checkbox_public.click()
 
-def get_description():
+    if 'private' in type.lower() and not 'public' in type.lower():
+        if is_checked_public:
+            checkbox_public.click()
+        if not is_checked_private:
+            checkbox_private.click()
+
+    if 'public' in type.lower() and 'private' in type.lower():
+        if not is_checked_public:
+            checkbox_public.click()
+        if not is_checked_private:
+            checkbox_private.click()
+
+def get_description(csv_file, i):
     descs = driver.find_elements(By.CLASS_NAME,'InstDesc')
+    spam_writer = csv.writer(csv_file, dialect='excel')
     for desc in descs:
         if desc.get_attribute('align') != 'center':
             desc_line = desc.text.splitlines()
+            i += len(desc_line)/3
             del desc_line[2:]
             print(desc_line)
-            with open('US_schools.csv', 'w', newline='') as csv_file:
-                spam_writer = csv.writer(csv_file, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
-                spam_writer.writerow(desc_line)
+            spam_writer.writerow(desc_line)
+    return i
 
 
 i = 0
+distric = 0
 options = return_options('select')
-for option in options:
-    option.click()
-    open_window_city()
-    switch_window(1)
-    citys = get_city_names()
-    driver.close()
-    switch_window(0)
-    i += len(citys)
-    print(f'Num of citys: {i}')
-    set_type_of_school('public')
-    for city in citys:
-        set_city_name(city)
-        get_description()
+index = 0
+with open('US_schools.csv', 'w', newline='') as csv_file:
+    for index in range(len(options)):
+        options[index].click()
+        open_window_city()
+        switch_window(1)
+        citys = get_city_names()
+        driver.close()
+        switch_window(0)
+        set_type_of_school('public and private')
+        for city in citys:
+            set_city_name(city)
+            i = get_description(csv_file,i)
+            print(f'Número de escolas: {i}')
+        distric += 1
+        options = return_options('select')
+        index += 1
+
