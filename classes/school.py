@@ -1,60 +1,9 @@
-from selenium import webdriver
-class DriverOperations:
-    def __init__(self):
-        self.driver = webdriver.Chrome()
-    def start_driver(self):
-        self.driver.implicitly_wait(0.5)
-        self.driver.get("https://nces.ed.gov/globallocator/")
-
-from selenium.webdriver.support.select import Select
 from selenium.webdriver.common.by import By
-class StateOperations(DriverOperations):
-    def __init__(self,tag_name,driver):
-        self.tag_name = tag_name
-        self.driver = driver
-
-    def return_select_options(self):
-        select = Select(self.driver.find_element(By.TAG_NAME,self.tag_name))
-        all_options = select.options
-        for option in select.options:
-            value_len = len(option.get_attribute('value'))
-            if value_len != 2:
-                all_options.remove(option)
-        return all_options
-
-from selenium.webdriver.common.by import By
-class WindowOperations:
-    def __init__(self,driver):
-        self.driver = driver
-    def open_citys_window(self): #Window class
-        browse_for_city = self.driver.find_element(By.PARTIAL_LINK_TEXT,'Browse')
-        browse_for_city.click()
-
-    def switch_window(self,num_window): #Window class
-        windows =  self.driver.window_handles
-        self.driver.switch_to.window(windows[num_window])
-
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.by import By
-class CityOperations: 
-    def __init__(self,driver):
-        self.driver = driver
-
-    def get_citys_names(self): #City class
-        lists_of_citys = self.driver.find_elements(By.TAG_NAME,'li')
-        city_names = []
-        for li in lists_of_citys:
-            city_names.append(li.text)
-        return city_names
-
-
-    def point_cursor_in_input_box(self,city_name: str): #City class
-        input_city = self.driver.find_element(By.ID,'city') 
-        input_city.clear()
-        input_city.send_keys(city_name)
-        input_city.send_keys(Keys.ENTER)
-
+from classes.window import WindowOperations
+from classes.city import CityOperations
+from classes.state import StateOperations
 import csv
+
 class SchoolOperations:
     def __init__(self,driver):
         self.driver = driver
@@ -139,8 +88,3 @@ class SchoolOperations:
             index += 1
         
         csv_file.close()
-
-driver_chrome = DriverOperations()
-driver_chrome.start_driver()
-school = SchoolOperations(driver_chrome.driver)
-school.search_school(1000,'Public')
