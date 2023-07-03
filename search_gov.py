@@ -1,9 +1,4 @@
 from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.select import Select
-import csv
-
 class DriverOperations:
     def __init__(self):
         self.driver = webdriver.Chrome()
@@ -11,6 +6,8 @@ class DriverOperations:
         self.driver.implicitly_wait(0.5)
         self.driver.get("https://nces.ed.gov/globallocator/")
 
+from selenium.webdriver.support.select import Select
+from selenium.webdriver.common.by import By
 class StateOperations(DriverOperations):
     def __init__(self,tag_name,driver):
         self.tag_name = tag_name
@@ -25,6 +22,7 @@ class StateOperations(DriverOperations):
                 all_options.remove(option)
         return all_options
 
+from selenium.webdriver.common.by import By
 class WindowOperations:
     def __init__(self,driver):
         self.driver = driver
@@ -36,6 +34,8 @@ class WindowOperations:
         windows =  self.driver.window_handles
         self.driver.switch_to.window(windows[num_window])
 
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.by import By
 class CityOperations: 
     def __init__(self,driver):
         self.driver = driver
@@ -54,6 +54,7 @@ class CityOperations:
         input_city.send_keys(city_name)
         input_city.send_keys(Keys.ENTER)
 
+import csv
 class SchoolOperations:
     def __init__(self,driver):
         self.driver = driver
