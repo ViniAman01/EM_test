@@ -6,4 +6,3 @@ class DriverOperations:
     def start_driver(self):
         self.driver.implicitly_wait(0.5)
         self.driver.get("https://nces.ed.gov/globallocator/")
-

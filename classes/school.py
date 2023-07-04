@@ -35,7 +35,6 @@ class SchoolOperations:
 
     def adjust_description_line(self,description,type_school):
         description_line = description.text.splitlines() #Esse passo não faz sentido usando os IDS, é necessário alterar o tratamento
-        description_line[0] = description_line[0][2:]
         del description_line[3:]
         description_line[2] = description_line[2].replace(' ','')
         description_line[2] = description_line[2][:13]
@@ -44,26 +43,30 @@ class SchoolOperations:
         return description_line
 
     def set_school_description(self,csv_file,number_school,count): #School class
-        public_schools_descriptions = self.driver.find_elements(By.ID,'hiddenitems_school') #Todas as escolas publicas vão pra essa variavel necessario novo tratamento
-        private_schools_descriptions = self.driver.find_elements(By.ID,'hiddenitems_privschool') #O mesmo para as privadas
+        public_schools_table = self.driver.find_elements(By.ID,'hiddenitems_school') #Todas as escolas publicas vão pra essa variavel necessario novo tratamento
+        private_schools_table = self.driver.find_elements(By.ID,'hiddenitems_privschool') #O mesmo para as privadas
 
         spam_writer = csv.writer(csv_file, dialect='excel')
 
-        for description in public_schools_descriptions:
-            if description.get_attribute('align') != 'center':
-                # if count >= number_school and number_school != -1:
-                #     break
-                description_line = self.adjust_description_line(description,'Public')
-                spam_writer.writerow(description_line)
-                count += 1
+        if public_schools_table:
+            public_schools_descriptions = public_schools_table[0].find_elements(By.CLASS_NAME,'InstDesc')
+            for description in public_schools_descriptions:
+                if count >= number_school and number_school != -1:
+                    break
+                if description.get_attribute('align') != 'center':
+                    description_line = self.adjust_description_line(description,'Public')
+                    spam_writer.writerow(description_line)
+                    count += 1
 
-        for description in private_schools_descriptions:
-            if description.get_attribute('align') != 'center':
-                # if count >= number_school and number_school != -1:
-                #     break
-                description_line = self.adjust_description_line(description,'Private')
-                spam_writer.writerow(description_line)
-                count += 1
+        if private_schools_table:
+            private_schools_descriptions = private_schools_table[0].find_elements(By.CLASS_NAME,'InstDesc')
+            for description in private_schools_descriptions:
+                if count >= number_school and number_school != -1:
+                    break
+                if description.get_attribute('align') != 'center':
+                    description_line = self.adjust_description_line(description,'Private')
+                    spam_writer.writerow(description_line)
+                    count += 1
 
         return count
 
@@ -83,8 +86,8 @@ class SchoolOperations:
         count = 0
         #Posicionar corretamente condições que interrompem a execução em determinado número de escolas
         for index in range(len(states_options)):
-            # if count >= number_school and number_school != -1:
-            #     break
+            if count >= number_school and number_school != -1:
+                break
             states_options[index].click()
             window.open_citys_window()
             window.switch_window(1)
@@ -92,8 +95,8 @@ class SchoolOperations:
             self.driver.close()
             window.switch_window(0)
             for city_name in citys_names:
-                # if count >= number_school and number_school != -1:
-                #     break
+                if count >= number_school and number_school != -1:
+                    break
                 city.put_city_in_input_box(city_name)
                 count = self.set_school_description(csv_file,number_school,count)
 
