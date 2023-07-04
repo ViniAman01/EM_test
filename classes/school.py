@@ -34,7 +34,7 @@ class SchoolOperations:
                 checkbox_private.click()
 
     def adjust_description_line(self,description,type_school):
-        description_line = description.text.splitlines()
+        description_line = description.text.splitlines() #Esse passo não faz sentido usando os IDS, é necessário alterar o tratamento
         description_line[0] = description_line[0][2:]
         del description_line[3:]
         description_line[2] = description_line[2].replace(' ','')
@@ -43,21 +43,29 @@ class SchoolOperations:
 
         return description_line
 
-    def set_school_description(self,csv_file): #School class
-        public_schools_descriptions = self.driver.find_elements(By.ID,'hiddenitems_school')
-        private_schools_descriptions = self.driver.find_elements(By.ID,'hiddenitems_privschool')
+    def set_school_description(self,csv_file,number_school,count): #School class
+        public_schools_descriptions = self.driver.find_elements(By.ID,'hiddenitems_school') #Todas as escolas publicas vão pra essa variavel necessario novo tratamento
+        private_schools_descriptions = self.driver.find_elements(By.ID,'hiddenitems_privschool') #O mesmo para as privadas
 
         spam_writer = csv.writer(csv_file, dialect='excel')
 
         for description in public_schools_descriptions:
             if description.get_attribute('align') != 'center':
+                # if count >= number_school and number_school != -1:
+                #     break
                 description_line = self.adjust_description_line(description,'Public')
                 spam_writer.writerow(description_line)
+                count += 1
 
         for description in private_schools_descriptions:
             if description.get_attribute('align') != 'center':
+                # if count >= number_school and number_school != -1:
+                #     break
                 description_line = self.adjust_description_line(description,'Private')
                 spam_writer.writerow(description_line)
+                count += 1
+
+        return count
 
     def search_school(self,number_school,type_school):
         window = WindowOperations(self.driver)
@@ -65,26 +73,31 @@ class SchoolOperations:
         state = StateOperations('select',self.driver)
 
         self.set_type_of_school(type_school)
-        options = state.return_select_options()
+        states_options = state.return_select_options()
 
-        csv_file = open('US_schools.csv', 'w', newline='')
+        csv_file = open('US_schools2.csv', 'w', newline='')
         spam_writer = csv.writer(csv_file, dialect='excel')
         spam_writer.writerow(["Name","Adress","Phone","Type"])
 
         index = 0
-
-        for index in range(len(options)):
-            options[index].click()
+        count = 0
+        #Posicionar corretamente condições que interrompem a execução em determinado número de escolas
+        for index in range(len(states_options)):
+            # if count >= number_school and number_school != -1:
+            #     break
+            states_options[index].click()
             window.open_citys_window()
             window.switch_window(1)
             citys_names = city.get_citys_names()
+            self.driver.close()
             window.switch_window(0)
-
             for city_name in citys_names:
-                city.point_cursor_in_input_box(city_name)
-                self.set_school_description(csv_file)
+                # if count >= number_school and number_school != -1:
+                #     break
+                city.put_city_in_input_box(city_name)
+                count = self.set_school_description(csv_file,number_school,count)
 
-            options = state.return_select_options()
+            states_options = state.return_select_options()
             index += 1
         
         csv_file.close()

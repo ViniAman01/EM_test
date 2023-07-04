@@ -13,7 +13,7 @@ class CityOperations:
         return city_names
 
 
-    def point_cursor_in_input_box(self,city_name: str): #City class
+    def put_city_in_input_box(self,city_name: str): #City class
         input_city = self.driver.find_element(By.ID,'city') 
         input_city.clear()
         input_city.send_keys(city_name)
