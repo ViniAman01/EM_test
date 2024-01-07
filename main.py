@@ -10,6 +10,7 @@ app = FastAPI()
 origins = [
     "http://localhost:3000",
     "http://localhost:8000",
+    "http://localhost:4200",
 ]
 
 app.add_middleware(
@@ -24,7 +25,7 @@ class SearchInfo(BaseModel):
     type_school: str
     number_schools: int
 
-@app.post("/receber-opcao")
+@app.post("/start-search")
 async def executar_back(search_info: SearchInfo): 
     driver_chrome = DriverOperations()
     driver_chrome.start_driver()
